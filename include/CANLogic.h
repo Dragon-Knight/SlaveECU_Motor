@@ -1,14 +1,16 @@
 #pragma once
-
+#include <EasyPinD.h>
 #include <CANLibrary.h>
 
-void HAL_CAN_Send(can_object_id_t id, uint8_t *data, uint8_t length);
-
 extern CAN_HandleTypeDef hcan;
-extern UART_HandleTypeDef huart1;
+extern void HAL_CAN_Send(can_object_id_t id, uint8_t *data, uint8_t length);
 
 namespace CANLib
 {
+	
+	EasyPinD can_rs(GPIOA, {GPIO_PIN_15, GPIO_MODE_OUTPUT_OD, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW}, GPIO_PIN_SET);
+
+
 	//*********************************************************************
 	// CAN Library settings
 	//*********************************************************************
@@ -115,8 +117,18 @@ namespace CANLib
 	CANObject<uint32_t, 1> obj_controller_odometer(0x010D, 5000, CAN_ERROR_DISABLED);
 	
 	
+	void HardwareSetup()
+	{
+		can_rs.Init();
+		
+		HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_ERROR | CAN_IT_BUSOFF | CAN_IT_LAST_ERROR_CODE);
+		HAL_CAN_Start(&hcan);
+	}
+	
 	inline void Setup()
 	{
+		HardwareSetup();
+		
 		set_block_info_params(obj_block_info);
 		set_block_health_params(obj_block_health);
 		set_block_features_params(obj_block_features);
