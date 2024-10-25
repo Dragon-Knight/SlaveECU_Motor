@@ -40,7 +40,7 @@ class MotorManager
 		void RawRx(uint8_t idx, const uint8_t *raw, const uint8_t length);
 		void RawTx(uint8_t idx, const uint8_t *raw, const uint8_t length);
 		
-		motor_common_data_t common_data[_max_dev];
+		MotorManagerData::common_data_t common_data[_max_dev];
 		bool common_data_ready[_max_dev];
 		
 	private:

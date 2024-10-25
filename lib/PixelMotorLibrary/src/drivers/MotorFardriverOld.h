@@ -7,6 +7,7 @@
 #include "MotorFardriverOld_Data.h"
 
 namespace FdOld = FardriverOld;
+namespace MMD = MotorManagerData;
 
 class MotorFardriverOld : public MotorDeviceInterface
 {
@@ -118,7 +119,7 @@ class MotorFardriverOld : public MotorDeviceInterface
 				_busy = false;
 			}
 			
-			if(time - _last_request_time > FdOld::PacketRequestInerval && _auth == true)
+			if(time - _last_request_time > FdOld::PacketRequestInerval /*&& _auth == true*/)
 			{
 				_last_request_time = time;
 
@@ -155,18 +156,18 @@ class MotorFardriverOld : public MotorDeviceInterface
 			return (raw <= 200) ? (uint8_t)raw : (int8_t)raw;
 		}
 		
-		static inline gear_t FixGear(uint8_t raw)
+		static inline MMD::gear_t FixGear(uint8_t raw)
 		{
 			// 01 - Передняя
 			// 0С - Нейтраль
 			// 0E - Задняя
 			
-			return (gear_t)(raw & 0x03);
+			return (MMD::gear_t)(raw & 0x03);
 		}
 		
-		static inline roll_t FixRoll(uint8_t raw)
+		static inline MMD::roll_t FixRoll(uint8_t raw)
 		{
-			roll_t result = ROLL_UNKNOWN;
+			MMD::roll_t result = MMD::ROLL_UNKNOWN;
 			
 			// 00 - Стоп
 			// 01 - Назад
@@ -174,9 +175,9 @@ class MotorFardriverOld : public MotorDeviceInterface
 			
 			switch(raw)
 			{
-				case 0x00: { result = ROLL_STOP; break; }
-				case 0x01: { result = ROLL_REVERSE; break; }
-				case 0x03: { result = ROLL_FORWARD; break; }
+				case 0x00: { result = MMD::ROLL_STOP; break; }
+				case 0x01: { result = MMD::ROLL_REVERSE; break; }
+				case 0x03: { result = MMD::ROLL_FORWARD; break; }
 			}
 			
 			return result;
@@ -207,7 +208,7 @@ class MotorFardriverOld : public MotorDeviceInterface
 		bool _ready;						// Флаг того, что массив данные приняты и готовы к анализу
 		
 		uint8_t _data[FdOld::PacketSize];	// Холодный массив данных (Работа в программе)
-		motor_common_data_t *common_data;	// Указатель на массив объект общий данных
+		MMD::common_data_t *common_data;	// Указатель на массив объект общий данных
 
 
 

@@ -89,7 +89,7 @@ namespace Motors
 		{
 			tick_25 = current_time;
 			
-			motor_common_data_t *common_data;
+			MotorManagerData::common_data_t *common_data;
 			for(uint8_t idx = 0; idx < 2; ++idx)
 			{
 				if( manager.common_data_ready[idx] == false ) continue;
