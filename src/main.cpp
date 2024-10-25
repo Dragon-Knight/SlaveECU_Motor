@@ -10,6 +10,7 @@
 #include <Leds.h>
 #include <CANLogic.h>
 #include <MotorLogic.h>
+#include <MotorCtrl.h>
 #include <Analog.h>
 
 
@@ -19,6 +20,7 @@ SPI_HandleTypeDef hspi2;
 UART_HandleTypeDef hDebugUart;
 UART_HandleTypeDef hMotor1Uart;
 UART_HandleTypeDef hMotor2Uart;
+TIM_HandleTypeDef htim3;
 
 
 
@@ -37,6 +39,7 @@ static void MX_SPI2_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_TIM3_Init(void);
 static void MX_GPIO_Init(void);
 
 
@@ -197,12 +200,14 @@ int main()
 	MX_USART1_UART_Init();
 	MX_USART2_UART_Init();
 	MX_USART3_UART_Init();
+	MX_TIM3_Init();
 	MX_GPIO_Init();
 	
 
     About::Setup();
     Leds::Setup();
 	Motors::Setup();
+	MotorCtrl::Setup();
     CANLib::Setup();
 	SPI::Setup();
 
@@ -214,6 +219,7 @@ int main()
         About::Loop(current_time);
         Leds::Loop(current_time);
 		Motors::Loop(current_time);
+		MotorCtrl::Loop(current_time);
         CANLib::Loop(current_time);
 		SPI::Loop(current_time);
 	}
@@ -382,6 +388,63 @@ static void MX_USART3_UART_Init(void)
 	{
 		Error_Handler();
 	}
+}
+
+static void MX_TIM3_Init(void)
+{
+	TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+	TIM_MasterConfigTypeDef sMasterConfig = {0};
+	TIM_OC_InitTypeDef sConfigOC = {0};
+
+	htim3.Instance = TIM3;
+	htim3.Init.Prescaler = 63;
+	htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim3.Init.Period = 1023;
+	htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+	if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+	{
+		Error_Handler();
+	}
+/*
+	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+	if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+*/
+	if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+	{
+		Error_Handler();
+	}
+/*
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+*/
+	sConfigOC.OCMode = TIM_OCMODE_PWM1;
+	sConfigOC.Pulse = 250;
+	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	sConfigOC.Pulse = 750;
+	if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+	{
+		Error_Handler();
+	}
+
+	HAL_TIM_MspPostInit(&htim3);
+
+    // Запуск ШИМ на каналах 1 и 2
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 }
 
 static void MX_GPIO_Init(void)

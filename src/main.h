@@ -7,6 +7,7 @@ extern "C" {
 
 #include "stm32f1xx_hal.h"
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 void Error_Handler(void);
 
 #ifdef __cplusplus
