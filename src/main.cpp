@@ -206,10 +206,10 @@ int main()
 
     About::Setup();
     Leds::Setup();
+	SPI::Setup();
 	Motors::Setup();
 	MotorCtrl::Setup();
     CANLib::Setup();
-	SPI::Setup();
 
 	Leds::obj.SetOn(Leds::LED_GREEN, 50, 1950);
 
@@ -218,10 +218,10 @@ int main()
     {
         About::Loop(current_time);
         Leds::Loop(current_time);
+		SPI::Loop(current_time);
 		Motors::Loop(current_time);
 		MotorCtrl::Loop(current_time);
         CANLib::Loop(current_time);
-		SPI::Loop(current_time);
 	}
 }
 void SystemClock_Config(void)
