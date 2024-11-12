@@ -206,10 +206,10 @@ int main()
 
     About::Setup();
     Leds::Setup();
+	SPI::Setup();
 	Motors::Setup();
 	MotorCtrl::Setup();
     CANLib::Setup();
-	SPI::Setup();
 
 	Leds::obj.SetOn(Leds::LED_GREEN, 50, 1950);
 
@@ -218,10 +218,10 @@ int main()
     {
         About::Loop(current_time);
         Leds::Loop(current_time);
+		SPI::Loop(current_time);
 		Motors::Loop(current_time);
 		MotorCtrl::Loop(current_time);
         CANLib::Loop(current_time);
-		SPI::Loop(current_time);
 	}
 }
 void SystemClock_Config(void)
@@ -441,10 +441,6 @@ static void MX_TIM3_Init(void)
 	}
 
 	HAL_TIM_MspPostInit(&htim3);
-
-    // Запуск ШИМ на каналах 1 и 2
-    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
 }
 
 static void MX_GPIO_Init(void)

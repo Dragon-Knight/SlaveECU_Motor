@@ -1,8 +1,10 @@
 #pragma once
 #include <inttypes.h>
 #include <EasyPinA.h>
+#include "MovingAverage.h"
 
 extern ADC_HandleTypeDef hadc1;
+extern TIM_HandleTypeDef htim3;
 
 namespace MotorCtrl
 {
@@ -17,10 +19,13 @@ namespace MotorCtrl
 	static uint8_t BREAK_RECOVERY = 0b00010000;
 	static uint8_t LOCK = 0b10000000;
 
+	static constexpr uint16_t PWM_MIN = 150;
+	static constexpr uint16_t PWM_MAX = 950;
+
 
 	
-	EasyPinA throttle(&hadc1, GPIOA, GPIO_PIN_1, ADC_CHANNEL_1);
-
+	EasyPinA throttle(&hadc1, GPIOA, GPIO_PIN_1, ADC_CHANNEL_1, ADC_SAMPLETIME_55CYCLES_5);
+	MovingAverage<uint16_t, uint32_t, 12> throttle_val;
 
 
 	
@@ -64,16 +69,36 @@ namespace MotorCtrl
 
 
 
-
-
+	void HardwareSetup()
+	{
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, PWM_MIN);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, PWM_MIN);
+		
+		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+		
+		return;
+	}
+	
 	inline void Setup()
 	{
+		HardwareSetup();
+
 		throttle.Init();
-		throttle.Calibration();
 		
 
 		return;
 	}
+
+	uint16_t val1 = 0;
+
+	const uint32_t gist1 = 10;
+	const uint32_t gist2 = 50;
+	const uint32_t gist3 = 100;
+	const uint32_t sample_counter = 5;
+	uint32_t counter_pos = 0;
+	uint32_t counter_neg = 0;
+	uint32_t adc_val = 0;
 	
 	inline void Loop(uint32_t &current_time)
 	{
@@ -82,13 +107,77 @@ namespace MotorCtrl
 		if(current_time - tick_20 > 20)
 		{
 			tick_20 = current_time;
+
 			
 			uint16_t throttle_adc = throttle.Get();
+			throttle_adc >>= 2;
+			
+			if( throttle_adc > adc_val )
+			{
+				counter_pos++;
+				counter_neg = 0;
+			}
+			else if( throttle_adc < adc_val )
+			{
+				counter_neg++;
+				counter_pos = 0;
+			}
+
+			if( throttle_adc > (adc_val + gist3) )
+			{
+				if( counter_pos >= sample_counter )
+					adc_val += gist3;
+			}
+			else if( throttle_adc < (adc_val - gist3) )
+			{
+				if( counter_neg >= sample_counter )
+					adc_val -= gist3;
+			}
+
+			if( throttle_adc > (adc_val + gist2) && throttle_adc <= (adc_val + gist3) )
+			{
+				if( counter_pos >= sample_counter )
+					adc_val += gist2;
+			}
+			else if( throttle_adc < (adc_val - gist2) && throttle_adc >= (adc_val - gist3) )
+			{
+				if( counter_neg >= sample_counter )
+					adc_val -= gist2;
+			}
+
+			if( throttle_adc > (adc_val + gist1) )
+			{
+				if( counter_pos >= sample_counter )
+					adc_val++;
+			}
+			else if( throttle_adc < (adc_val - gist1) )
+			{
+				if( counter_neg >= sample_counter )
+					adc_val--;
+			}
+
+
+
+
+
+			//throttle_val.Push(throttle_adc);
 			DEBUG_LOG_TOPIC("Motor", "throttle: %04d\n", throttle_adc);
+			Logger.Printf(">Motor raw:%d\n", throttle_adc);
+			Logger.Printf(">Motor calc:%d\n", adc_val);
 			if(CheckThrottleValue(throttle_adc) == true)
 			{
 
 			}
+
+			
+			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, val1);
+			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (1023 - val1));
+			if(++val1 == 1023) val1 = 0;
+			
+			
+
+
+
 		}
 		
 		

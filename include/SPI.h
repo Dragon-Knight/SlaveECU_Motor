@@ -1,6 +1,8 @@
 #pragma once
 #include <inttypes.h>
-#include <SPIManager.h>
+#include <drivers/SPI_ZD25Q80B.h>
+#include <drivers/SPI_CAT25080.h>
+#include <drivers/SPI_HC595.h>
 #include "SPIFast.h"
 
 extern SPI_HandleTypeDef hspi2;
@@ -39,8 +41,7 @@ namespace SPI
 	SPIManager<3> manager(SPI_Config, SPI_Write, SPI_Read, SPI_WriteRead);
 	SPI_ZD25Q80B flash({GPIOB, GPIO_PIN_12}, SPI_BAUDRATEPRESCALER_2);
 	SPI_CAT25080 eeprom({GPIOA, GPIO_PIN_8}, SPI_BAUDRATEPRESCALER_8);
-	SPI_HC595<2> hc595({GPIOB, GPIO_PIN_4}, {GPIOB, GPIO_PIN_3}, SPI_BAUDRATEPRESCALER_8);
-	EasyPinD hc595_oe(GPIOB, {GPIO_PIN_2, GPIO_MODE_OUTPUT_PP, GPIO_NOPULL, GPIO_SPEED_FREQ_HIGH}, GPIO_PIN_RESET);
+	SPI_HC595<2> hc595({GPIOB, GPIO_PIN_4}, {GPIOB, GPIO_PIN_3}, {GPIOB, GPIO_PIN_2}, SPI_BAUDRATEPRESCALER_8);
 	
 	
 	void Setup123()
@@ -104,7 +105,7 @@ namespace SPI
 		manager.AddDevice(eeprom);
 		manager.AddDevice(hc595);
 		
-		hc595_oe.Init();
+		hc595.OutputEnable();
 		
 		uint8_t dev_id[3] = {0x00};
 		flash.ReadDevID(dev_id);
