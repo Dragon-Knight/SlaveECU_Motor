@@ -14,10 +14,11 @@ namespace MotorCtrl
 		GEAR_NEUTRAL = 0b00000000,
 		GEAR_FORWARD_LOW = 0b00000001,
 		GEAR_FORWARD_HI = 0b00000010,
-		GEAR_REVERSE = 0b00000100
+		GEAR_REVERSE = 0b00000100,
+		GEAR_MASK = 0b00000111
 	};
-	static uint8_t BREAK_RECOVERY = 0b00010000;
-	static uint8_t LOCK = 0b10000000;
+	static uint8_t BREAK_RECOVERY_BIT = 4;
+	static uint8_t LOCK_BIT = 7;
 
 	static constexpr uint16_t PWM_MIN = 150;
 	static constexpr uint16_t PWM_MAX = 950;
@@ -32,7 +33,7 @@ namespace MotorCtrl
 	// Управление передачей
 	void SetGear(uint8_t idx, gear_t gear)
 	{
-		SPI::hc595.WriteByMask(idx, gear, 0b00000111);
+		SPI::hc595.WriteByMask(idx, gear, GEAR_MASK);
 		
 		return;
 	}
@@ -40,7 +41,7 @@ namespace MotorCtrl
 	// Управление рекупирацией (тормозом)
 	void SetBreak(uint8_t idx, bool state)
 	{
-		SPI::hc595.SetState(idx, 4, state);
+		SPI::hc595.SetState(idx, BREAK_RECOVERY_BIT, state);
 		
 		return;
 	}
@@ -48,7 +49,7 @@ namespace MotorCtrl
 	// Управление питанием контроллера (замок зажигания)
 	void SetLock(uint8_t idx, bool state)
 	{
-		SPI::hc595.SetState(idx, 7, state);
+		SPI::hc595.SetState(idx, LOCK_BIT, state);
 		
 		return;
 	}
@@ -85,6 +86,8 @@ namespace MotorCtrl
 		HardwareSetup();
 
 		throttle.Init();
+
+		//SetGear(0, GEAR_REVERSE);
 		
 
 		return;
