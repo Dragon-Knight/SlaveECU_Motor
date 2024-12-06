@@ -32,6 +32,8 @@ namespace Leds
 		HAL_Delay(100);
 		obj.SetOff(LED_RED);
 		
+		Leds::obj.SetOn(Leds::LED_GREEN, 50, 1950);
+		
 		return;
 	}
 	

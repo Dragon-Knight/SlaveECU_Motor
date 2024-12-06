@@ -95,7 +95,7 @@ namespace Motors
 				if( manager.common_data_ready[idx] == false ) continue;
 				
 				common_data = &manager.common_data[idx];
-				
+				/*
 				CANLib::obj_controller_rpm.SetValue(idx, common_data->rpm, CAN_TIMER_TYPE_NORMAL);
 				CANLib::obj_controller_speed.SetValue(idx, common_data->speed, CAN_TIMER_TYPE_NORMAL);
 				CANLib::obj_controller_gear_n_roll.SetValue(2 * idx, common_data->gear, CAN_TIMER_TYPE_NORMAL);
@@ -108,7 +108,7 @@ namespace Motors
 				if(common_data->errors > 0)
 				{
 					CANLib::obj_controller_errors.SetValue(idx, common_data->errors, CAN_TIMER_TYPE_CRITICAL, CAN_EVENT_TYPE_NORMAL);
-				}
+				}*/
 			}
 		}
 

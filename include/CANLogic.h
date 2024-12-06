@@ -3,56 +3,52 @@
 #include <CANLibrary.h>
 
 extern CAN_HandleTypeDef hcan;
-extern void HAL_CAN_Send(can_object_id_t id, uint8_t *data, uint8_t length);
+extern void HAL_CAN_Send(uint16_t id, uint8_t *data_raw, uint8_t length_raw);
 
 namespace CANLib
 {
-	
-	EasyPinD can_rs(GPIOA, {GPIO_PIN_15, GPIO_MODE_OUTPUT_OD, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW}, GPIO_PIN_SET);
-
-
-	//*********************************************************************
-	// CAN Library settings
-	//*********************************************************************
-
-	/// @brief Number of CANObjects in CANManager
-	static constexpr uint8_t CFG_CANObjectsCount = 13;
-
-	/// @brief The size of CANManager's internal CAN frame buffer
+	static constexpr uint8_t CFG_CANObjectsCount = 31;
 	static constexpr uint8_t CFG_CANFrameBufferSize = 16;
-
-	//*********************************************************************
-	// CAN Manager
-	//*********************************************************************
+	static constexpr uint16_t CFG_CANFirstId = 0x0100;
+	
+	EasyPinD can_rs(GPIOA, {GPIO_PIN_15, GPIO_MODE_OUTPUT_OD, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW});
+	
 	CANManager<CFG_CANObjectsCount, CFG_CANFrameBufferSize> can_manager(&HAL_CAN_Send);
+	
+	CANObject<uint8_t,  7> obj_block_info(CFG_CANFirstId + 0);
+	CANObject<uint8_t,  7> obj_block_health(CFG_CANFirstId + 1);
+	CANObject<uint8_t,  7> obj_block_features(CFG_CANFirstId + 2);
+	CANObject<uint8_t,  7> obj_block_error(CFG_CANFirstId + 3);
 
-	//*********************************************************************
-	// CAN Blocks: common blocks
-	//*********************************************************************
-	// 0x0100 BlockInfo
-	// request | timer:15000
-	// 1 + X { type[0] data[1..7] }
-	// Основная информация о блоке. См. "Системные параметры".
-	CANObject<uint8_t, 7> obj_block_info(0x0100);
+	CANObject<uint16_t, 1> obj_throttle_value_1(CFG_CANFirstId + 4);
+	CANObject<uint16_t, 1> obj_throttle_value_2(CFG_CANFirstId + 5);
+	CANObject<uint8_t,  1> obj_transmission_value_1(CFG_CANFirstId + 6);
+	CANObject<uint8_t,  1> obj_transmission_value_2(CFG_CANFirstId + 7);
+	CANObject<uint8_t,  1> obj_brakerecuperation_flag_1(CFG_CANFirstId + 8);
+	CANObject<uint8_t,  1> obj_brakerecuperation_flag_2(CFG_CANFirstId + 9);
+	CANObject<uint8_t,  1> obj_ignitionlock_flag_1(CFG_CANFirstId + 10);
+	CANObject<uint8_t,  1> obj_ignitionlock_flag_2(CFG_CANFirstId + 11);
+	CANObject<uint16_t, 1> obj_controller_errors_1(CFG_CANFirstId + 12);
+	CANObject<uint16_t, 1> obj_controller_errors_2(CFG_CANFirstId + 13);
+	CANObject<uint16_t, 1> obj_rpm_1(CFG_CANFirstId + 14);
+	CANObject<uint16_t, 1> obj_rpm_2(CFG_CANFirstId + 15);
+	CANObject<uint16_t, 1> obj_speed_1(CFG_CANFirstId + 16);
+	CANObject<uint16_t, 1> obj_speed_2(CFG_CANFirstId + 17);
+	CANObject<uint16_t, 1> obj_voltage_1(CFG_CANFirstId + 18);
+	CANObject<uint16_t, 1> obj_voltage_2(CFG_CANFirstId + 19);
+	CANObject<int16_t,  1> obj_current_1(CFG_CANFirstId + 20);
+	CANObject<int16_t,  1> obj_current_2(CFG_CANFirstId + 21);
+	CANObject<int16_t,  1> obj_power_1(CFG_CANFirstId + 22);
+	CANObject<int16_t,  1> obj_power_2(CFG_CANFirstId + 23);
+	CANObject<uint8_t,  2> obj_gear_1_roll_1(CFG_CANFirstId + 24);
+	CANObject<uint8_t,  2> obj_gear_2_roll_2(CFG_CANFirstId + 25);
+	CANObject<int16_t,  1> obj_temperature_motor_1(CFG_CANFirstId + 26);
+	CANObject<int16_t,  1> obj_temperature_motor_2(CFG_CANFirstId + 27);
+	CANObject<int16_t,  1> obj_temperature_controller_1(CFG_CANFirstId + 28);
+	CANObject<int16_t,  1> obj_temperature_controller_2(CFG_CANFirstId + 29);
+	CANObject<uint32_t, 1> obj_odometer(CFG_CANFirstId + 30);
 
-	// 0x0101 BlockHealth
-	// request | event Link
-	// 1 + X { type[0] data[1..7] }
-	// Информация о здоровье блока. См. "Системные параметры".
-	CANObject<uint8_t, 7> obj_block_health(0x0101);
-
-	// 0x0102 BlockCfg
-	// request Link
-	// 1 + X { type[0] data[1..7] }
-	// Чтение и запись настроек блока. См. "Системные параметры".
-	CANObject<uint8_t, 7> obj_block_features(0x0102);
-
-	// 0x0103 BlockError
-	// request | event Link
-	// 1 + X { type[0] data[1..7] }
-	// Ошибки блока. См. "Системные параметры".
-	CANObject<uint8_t, 7> obj_block_error(0x0103);
-
+/*
 	//*********************************************************************
 	// CAN Blocks: specific blocks
 	//*********************************************************************
@@ -115,19 +111,31 @@ namespace CANLib
 	// uint32_t 100м 1 + 4 { type[0] m[1..4] }
 	// Одометр (общий для авто), в сотнях метров
 	CANObject<uint32_t, 1> obj_controller_odometer(0x010D, 5000, CAN_ERROR_DISABLED);
-	
-	
-	void HardwareSetup()
+*/	
+
+	void CAN_Enable()
 	{
-		can_rs.Init();
-		
 		HAL_CAN_ActivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_ERROR | CAN_IT_BUSOFF | CAN_IT_LAST_ERROR_CODE);
 		HAL_CAN_Start(&hcan);
+		
+		can_rs.On();
+		
+		return;
+	}
+	
+	void CAN_Disable()
+	{
+		HAL_CAN_DeactivateNotification(&hcan, CAN_IT_RX_FIFO0_MSG_PENDING | CAN_IT_ERROR | CAN_IT_BUSOFF | CAN_IT_LAST_ERROR_CODE);
+		HAL_CAN_Stop(&hcan);
+		
+		can_rs.Off();
+		
+		return;
 	}
 	
 	inline void Setup()
 	{
-		HardwareSetup();
+		can_rs.Init();
 		
 		set_block_info_params(obj_block_info);
 		set_block_health_params(obj_block_health);
@@ -138,58 +146,64 @@ namespace CANLib
 		can_manager.RegisterObject(obj_block_health);
 		can_manager.RegisterObject(obj_block_features);
 		can_manager.RegisterObject(obj_block_error);
-		can_manager.RegisterObject(obj_controller_errors);
-		can_manager.RegisterObject(obj_controller_rpm);
-		can_manager.RegisterObject(obj_controller_speed);
-		can_manager.RegisterObject(obj_controller_voltage);
-		can_manager.RegisterObject(obj_controller_current);
-		can_manager.RegisterObject(obj_controller_power);
-		can_manager.RegisterObject(obj_controller_gear_n_roll);
-		can_manager.RegisterObject(obj_motor_temperature);
-		can_manager.RegisterObject(obj_controller_temperature);
-		can_manager.RegisterObject(obj_controller_odometer);
-		
-		// Set versions data to block_info.
+
+		can_manager.RegisterObject(obj_throttle_value_1);
+		can_manager.RegisterObject(obj_throttle_value_2);
+		can_manager.RegisterObject(obj_transmission_value_1);
+		can_manager.RegisterObject(obj_transmission_value_2);
+		can_manager.RegisterObject(obj_brakerecuperation_flag_1);
+		can_manager.RegisterObject(obj_brakerecuperation_flag_2);
+		can_manager.RegisterObject(obj_ignitionlock_flag_1);
+		can_manager.RegisterObject(obj_ignitionlock_flag_2);
+		can_manager.RegisterObject(obj_controller_errors_1);
+		can_manager.RegisterObject(obj_controller_errors_2);
+		can_manager.RegisterObject(obj_rpm_1);
+		can_manager.RegisterObject(obj_rpm_2);
+		can_manager.RegisterObject(obj_speed_1);
+		can_manager.RegisterObject(obj_speed_2);
+		can_manager.RegisterObject(obj_voltage_1);
+		can_manager.RegisterObject(obj_voltage_2);
+		can_manager.RegisterObject(obj_current_1);
+		can_manager.RegisterObject(obj_current_2);
+		can_manager.RegisterObject(obj_power_1);
+		can_manager.RegisterObject(obj_power_2);
+		can_manager.RegisterObject(obj_gear_1_roll_1);
+		can_manager.RegisterObject(obj_gear_2_roll_2);
+		can_manager.RegisterObject(obj_temperature_motor_1);
+		can_manager.RegisterObject(obj_temperature_motor_2);
+		can_manager.RegisterObject(obj_temperature_controller_1);
+		can_manager.RegisterObject(obj_temperature_controller_2);
+		can_manager.RegisterObject(obj_odometer);
+
+		// Передача версий и типов в объект block_info
 		obj_block_info.SetValue(0, (About::board_type << 3 | About::board_ver), CAN_TIMER_TYPE_NORMAL);
 		obj_block_info.SetValue(1, (About::soft_ver << 2 | About::can_ver), CAN_TIMER_TYPE_NORMAL);
+
+		CAN_Enable();
 		
 		return;
 	}
-	
+
 	inline void Loop(uint32_t &current_time)
 	{
 		can_manager.Process(current_time);
-		
-		// Set uptime to block_info.
-		static uint32_t iter = 0;
-		if(current_time - iter > 1000)
-		{
-			iter = current_time;
 
-			uint8_t *data = (uint8_t *) &current_time;
+		// Передача UpTime блока в объект block_info
+		static uint32_t iter1000 = 0;
+		if(current_time - iter1000 > 1000)
+		{
+			iter1000 = current_time;
+			
+			uint8_t *data = (uint8_t *)&current_time;
 			obj_block_info.SetValue(2, data[0], CAN_TIMER_TYPE_NORMAL);
 			obj_block_info.SetValue(3, data[1], CAN_TIMER_TYPE_NORMAL);
 			obj_block_info.SetValue(4, data[2], CAN_TIMER_TYPE_NORMAL);
 			obj_block_info.SetValue(5, data[3], CAN_TIMER_TYPE_NORMAL);
 		}
 		
-		// TEST
-		static uint32_t time = 0;
-		if(current_time - time > 500)
-		{
-			time = current_time;
-
-			//uint16_t rand1 = current_time ^ current_time / 2;
-			//uint16_t rand2 = current_time ^ current_time / 4;
-
-			//obj_controller_voltage.SetValue(0, rand1, CAN_TIMER_TYPE_NORMAL);
-			//obj_controller_voltage.SetValue(1, rand1+50, CAN_TIMER_TYPE_NORMAL);
-			//obj_controller_current.SetValue(0, rand2, CAN_TIMER_TYPE_NORMAL);
-			//obj_controller_current.SetValue(1, rand2-50, CAN_TIMER_TYPE_NORMAL);
-		}
-
+		// При выходе обновляем время
 		current_time = HAL_GetTick();
-
+		
 		return;
 	}
 }

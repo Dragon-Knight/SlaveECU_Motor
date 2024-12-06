@@ -209,11 +209,9 @@ int main()
 	SPI::Setup();
 	Motors::Setup();
 	MotorCtrl::Setup();
-    CANLib::Setup();
-
-	Leds::obj.SetOn(Leds::LED_GREEN, 50, 1950);
-
-    uint32_t current_time = HAL_GetTick();
+	CANLib::Setup();
+	
+	uint32_t current_time = HAL_GetTick();
     while (1)
     {
         About::Loop(current_time);

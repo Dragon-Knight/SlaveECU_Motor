@@ -88,6 +88,22 @@ namespace MotorCtrl
 		throttle.Init();
 
 		//SetGear(0, GEAR_REVERSE);
+
+
+
+		CANLib::obj_throttle_value_1.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
+		{
+			uint16_t throttle = (can_frame.data[0] | (can_frame.data[1] << 8));
+
+			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, throttle);
+		});
+
+		CANLib::obj_throttle_value_2.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
+		{
+			uint16_t throttle = (can_frame.data[0] | (can_frame.data[1] << 8));
+			
+			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, throttle);
+		});
 		
 
 		return;
@@ -162,7 +178,7 @@ namespace MotorCtrl
 
 
 
-
+/*
 			//throttle_val.Push(throttle_adc);
 			DEBUG_LOG_TOPIC("Motor", "throttle: %04d\n", throttle_adc);
 			Logger.Printf(">Motor raw:%d\n", throttle_adc);
@@ -171,12 +187,12 @@ namespace MotorCtrl
 			{
 
 			}
-
-			
+*/
+/*			
 			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, val1);
 			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (1023 - val1));
 			if(++val1 == 1023) val1 = 0;
-			
+*/			
 			
 
 
