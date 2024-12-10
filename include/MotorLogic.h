@@ -85,33 +85,50 @@ namespace Motors
 		manager.Tick(current_time);
 
 		static uint32_t tick_25 = 0;
-		if(current_time - tick_25 > 25UL)
+		if(current_time - tick_25 > 50)
 		{
 			tick_25 = current_time;
-			
-			MotorManagerData::common_data_t *common_data;
-			for(uint8_t idx = 0; idx < 2; ++idx)
-			{
-				if( manager.common_data_ready[idx] == false ) continue;
-				
-				common_data = &manager.common_data[idx];
-				/*
-				CANLib::obj_controller_rpm.SetValue(idx, common_data->rpm, CAN_TIMER_TYPE_NORMAL);
-				CANLib::obj_controller_speed.SetValue(idx, common_data->speed, CAN_TIMER_TYPE_NORMAL);
-				CANLib::obj_controller_gear_n_roll.SetValue(2 * idx, common_data->gear, CAN_TIMER_TYPE_NORMAL);
-				CANLib::obj_controller_gear_n_roll.SetValue(2 * idx + 1, common_data->roll, CAN_TIMER_TYPE_NORMAL);
-				CANLib::obj_controller_voltage.SetValue(idx, common_data->voltage, CAN_TIMER_TYPE_NORMAL);
-				CANLib::obj_controller_current.SetValue(idx, common_data->current, CAN_TIMER_TYPE_NORMAL);
-				CANLib::obj_controller_power.SetValue(idx, common_data->power, CAN_TIMER_TYPE_NORMAL);
-				CANLib::obj_controller_temperature.SetValue(idx, common_data->temp_controller, CAN_TIMER_TYPE_NORMAL);
-				CANLib::obj_motor_temperature.SetValue(idx, common_data->temp_motor, CAN_TIMER_TYPE_NORMAL);
-				if(common_data->errors > 0)
-				{
-					CANLib::obj_controller_errors.SetValue(idx, common_data->errors, CAN_TIMER_TYPE_CRITICAL, CAN_EVENT_TYPE_NORMAL);
-				}*/
-			}
-		}
 
+			uint32_t total_odometer = 0;
+			MotorManagerData::common_data_t *common_data;
+			
+			if(manager.common_data_ready[0] == true)
+			{
+				common_data = &manager.common_data[0];
+				if(common_data->errors > 0) // Если была ошибка, то уже не сбросится. И вообще нужен event
+					CANLib::obj_controller_errors_1.SetValue(0, common_data->errors, CAN_TIMER_TYPE_CRITICAL, CAN_EVENT_TYPE_NORMAL);
+				CANLib::obj_rpm_1.SetValue(0, common_data->rpm, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_speed_1.SetValue(0, common_data->speed, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_voltage_1.SetValue(0, common_data->voltage, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_current_1.SetValue(0, common_data->current, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_power_1.SetValue(0, common_data->power, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_gear_1_roll_1.SetValue(0, common_data->gear, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_gear_1_roll_1.SetValue(1, common_data->roll, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_temperature_motor_1.SetValue(0, common_data->temp_motor, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_temperature_controller_1.SetValue(0, common_data->temp_controller, CAN_TIMER_TYPE_NORMAL);
+				total_odometer = common_data->odometer;
+			}
+
+			if(manager.common_data_ready[1] == true)
+			{
+				common_data = &manager.common_data[1];
+				if(common_data->errors > 0) // Если была ошибка, то уже не сбросится. И вообще нужен event
+					CANLib::obj_controller_errors_2.SetValue(0, common_data->errors, CAN_TIMER_TYPE_CRITICAL, CAN_EVENT_TYPE_NORMAL);
+				CANLib::obj_rpm_2.SetValue(0, common_data->rpm, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_speed_2.SetValue(0, common_data->speed, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_voltage_2.SetValue(0, common_data->voltage, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_current_2.SetValue(0, common_data->current, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_power_2.SetValue(0, common_data->power, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_gear_2_roll_2.SetValue(0, common_data->gear, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_gear_2_roll_2.SetValue(1, common_data->roll, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_temperature_motor_2.SetValue(0, common_data->temp_motor, CAN_TIMER_TYPE_NORMAL);
+				CANLib::obj_temperature_controller_2.SetValue(0, common_data->temp_controller, CAN_TIMER_TYPE_NORMAL);
+				total_odometer = (common_data->odometer > total_odometer) ? common_data->odometer : total_odometer;
+			}
+			
+			CANLib::obj_odometer.SetValue(0, total_odometer, CAN_TIMER_TYPE_NORMAL);
+		}
+		
 		current_time = HAL_GetTick();
 		
 		return;

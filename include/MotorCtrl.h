@@ -96,13 +96,59 @@ namespace MotorCtrl
 			uint16_t throttle = (can_frame.data[0] | (can_frame.data[1] << 8));
 
 			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, throttle);
-		});
 
+			return CAN_RESULT_IGNORE;
+		});
 		CANLib::obj_throttle_value_2.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
 		{
 			uint16_t throttle = (can_frame.data[0] | (can_frame.data[1] << 8));
 			
 			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, throttle);
+
+			return CAN_RESULT_IGNORE;
+		});
+
+		CANLib::obj_transmission_value_1.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
+		{
+			SetGear(0, (gear_t)can_frame.data[0]);
+			
+			return CAN_RESULT_IGNORE;
+		});
+		CANLib::obj_transmission_value_2.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
+		{
+			SetGear(1, (gear_t)can_frame.data[0]);
+			
+			return CAN_RESULT_IGNORE;
+		});
+
+		CANLib::obj_brakerecuperation_flag_1.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
+		{
+			bool state = (can_frame.data[0] == 0) ? false : true;
+			SetBreak(0, state);
+			
+			return CAN_RESULT_IGNORE;
+		});
+		CANLib::obj_brakerecuperation_flag_2.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
+		{
+			bool state = (can_frame.data[0] == 0) ? false : true;
+			SetBreak(1, state);
+			
+			return CAN_RESULT_IGNORE;
+		});
+		
+		CANLib::obj_ignitionlock_flag_1.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
+		{
+			bool state = (can_frame.data[0] == 0) ? false : true;
+			SetLock(0, state);
+			
+			return CAN_RESULT_IGNORE;
+		});
+		CANLib::obj_ignitionlock_flag_2.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
+		{
+			bool state = (can_frame.data[0] == 0) ? false : true;
+			SetLock(1, state);
+			
+			return CAN_RESULT_IGNORE;
 		});
 		
 

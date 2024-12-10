@@ -28,25 +28,25 @@ namespace CANLib
 	CANObject<uint8_t,  1> obj_brakerecuperation_flag_2(CFG_CANFirstId + 9);
 	CANObject<uint8_t,  1> obj_ignitionlock_flag_1(CFG_CANFirstId + 10);
 	CANObject<uint8_t,  1> obj_ignitionlock_flag_2(CFG_CANFirstId + 11);
-	CANObject<uint16_t, 1> obj_controller_errors_1(CFG_CANFirstId + 12);
-	CANObject<uint16_t, 1> obj_controller_errors_2(CFG_CANFirstId + 13);
-	CANObject<uint16_t, 1> obj_rpm_1(CFG_CANFirstId + 14);
-	CANObject<uint16_t, 1> obj_rpm_2(CFG_CANFirstId + 15);
-	CANObject<uint16_t, 1> obj_speed_1(CFG_CANFirstId + 16);
-	CANObject<uint16_t, 1> obj_speed_2(CFG_CANFirstId + 17);
-	CANObject<uint16_t, 1> obj_voltage_1(CFG_CANFirstId + 18);
-	CANObject<uint16_t, 1> obj_voltage_2(CFG_CANFirstId + 19);
-	CANObject<int16_t,  1> obj_current_1(CFG_CANFirstId + 20);
-	CANObject<int16_t,  1> obj_current_2(CFG_CANFirstId + 21);
-	CANObject<int16_t,  1> obj_power_1(CFG_CANFirstId + 22);
-	CANObject<int16_t,  1> obj_power_2(CFG_CANFirstId + 23);
-	CANObject<uint8_t,  2> obj_gear_1_roll_1(CFG_CANFirstId + 24);
-	CANObject<uint8_t,  2> obj_gear_2_roll_2(CFG_CANFirstId + 25);
-	CANObject<int16_t,  1> obj_temperature_motor_1(CFG_CANFirstId + 26);
-	CANObject<int16_t,  1> obj_temperature_motor_2(CFG_CANFirstId + 27);
-	CANObject<int16_t,  1> obj_temperature_controller_1(CFG_CANFirstId + 28);
-	CANObject<int16_t,  1> obj_temperature_controller_2(CFG_CANFirstId + 29);
-	CANObject<uint32_t, 1> obj_odometer(CFG_CANFirstId + 30);
+	CANObject<uint16_t, 1> obj_controller_errors_1(CFG_CANFirstId + 12, 250);
+	CANObject<uint16_t, 1> obj_controller_errors_2(CFG_CANFirstId + 13, 250);
+	CANObject<uint16_t, 1> obj_rpm_1(CFG_CANFirstId + 14, 250);
+	CANObject<uint16_t, 1> obj_rpm_2(CFG_CANFirstId + 15, 250);
+	CANObject<uint16_t, 1> obj_speed_1(CFG_CANFirstId + 16, 250);
+	CANObject<uint16_t, 1> obj_speed_2(CFG_CANFirstId + 17, 250);
+	CANObject<uint16_t, 1> obj_voltage_1(CFG_CANFirstId + 18, 500);
+	CANObject<uint16_t, 1> obj_voltage_2(CFG_CANFirstId + 19, 500);
+	CANObject<int16_t,  1> obj_current_1(CFG_CANFirstId + 20, 500);
+	CANObject<int16_t,  1> obj_current_2(CFG_CANFirstId + 21, 500);
+	CANObject<int16_t,  1> obj_power_1(CFG_CANFirstId + 22, 500);
+	CANObject<int16_t,  1> obj_power_2(CFG_CANFirstId + 23, 500);
+	CANObject<uint8_t,  2> obj_gear_1_roll_1(CFG_CANFirstId + 24, 500);
+	CANObject<uint8_t,  2> obj_gear_2_roll_2(CFG_CANFirstId + 25, 500);
+	CANObject<int16_t,  1> obj_temperature_motor_1(CFG_CANFirstId + 26, 1000);
+	CANObject<int16_t,  1> obj_temperature_motor_2(CFG_CANFirstId + 27, 1000);
+	CANObject<int16_t,  1> obj_temperature_controller_1(CFG_CANFirstId + 28, 1000);
+	CANObject<int16_t,  1> obj_temperature_controller_2(CFG_CANFirstId + 29, 1000);
+	CANObject<uint32_t, 1> obj_odometer(CFG_CANFirstId + 30, 5000);
 
 /*
 	//*********************************************************************
