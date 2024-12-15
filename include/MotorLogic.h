@@ -17,7 +17,7 @@ void OnMotorTX(const uint8_t motor_idx, const uint8_t *raw, const uint8_t raw_le
 namespace Motors
 {
 	void MOTOR_UART_TX(uint8_t idx, const uint8_t *raw, const uint16_t length);
-	void MOTOR_ERROR(uint8_t idx, int8_t code);
+	void MOTOR_ERROR(uint8_t idx, MotorDeviceInterface::error_code_t code);
 
 #warning Check packet req connection from controller. Check data
 	
@@ -49,9 +49,27 @@ namespace Motors
 		return;
 	}
 	
-	void MOTOR_ERROR(uint8_t idx, int8_t code)
+	void MOTOR_ERROR(uint8_t idx, MotorDeviceInterface::error_code_t code)
 	{
 		DEBUG_LOG_TOPIC("MOTOR-ERR", "idx: %d, code: %d\n", idx, code);
+
+		switch(idx)
+		{
+			case MOTOR_1:
+			{
+				if(code == MotorDeviceInterface::ERROR_CTRL)
+					CANLib::obj_controller_errors_1.SetValue(0, manager.common_data[MOTOR_1].errors, CAN_TIMER_TYPE_NONE, CAN_EVENT_TYPE_NORMAL);
+				
+				break;
+			}
+			case MOTOR_2:
+			{
+				if(code == MotorDeviceInterface::ERROR_CTRL)
+					CANLib::obj_controller_errors_1.SetValue(0, manager.common_data[MOTOR_2].errors, CAN_TIMER_TYPE_NONE, CAN_EVENT_TYPE_NORMAL);
+
+				break;
+			}
+		}
 	}
 	
 	
@@ -96,9 +114,6 @@ namespace Motors
 			{
 				common_data = &manager.common_data[0];
 				
-				if(common_data->errors > 0) // Если была ошибка, то уже не сбросится. И вообще нужен event
-					CANLib::obj_controller_errors_1.SetValue(0, common_data->errors, CAN_TIMER_TYPE_NONE, CAN_EVENT_TYPE_NORMAL);
-				
 				CANLib::obj_rpm_1.SetValue(0, common_data->rpm, CAN_TIMER_TYPE_NORMAL);
 				CANLib::obj_speed_1.SetValue(0, common_data->speed, CAN_TIMER_TYPE_NORMAL);
 				CANLib::obj_voltage_1.SetValue(0, common_data->voltage, CAN_TIMER_TYPE_NORMAL);
@@ -114,9 +129,6 @@ namespace Motors
 			if(manager.common_data_ready[1] == true)
 			{
 				common_data = &manager.common_data[1];
-				
-				if(common_data->errors > 0) // Если была ошибка, то уже не сбросится. И вообще нужен event
-					CANLib::obj_controller_errors_2.SetValue(0, common_data->errors, CAN_TIMER_TYPE_NONE, CAN_EVENT_TYPE_NORMAL);
 				
 				CANLib::obj_rpm_2.SetValue(0, common_data->rpm, CAN_TIMER_TYPE_NORMAL);
 				CANLib::obj_speed_2.SetValue(0, common_data->speed, CAN_TIMER_TYPE_NORMAL);

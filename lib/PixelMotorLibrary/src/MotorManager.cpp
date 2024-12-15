@@ -14,16 +14,18 @@ void MotorManager::SetModel(uint8_t idx, MotorDeviceInterface &device)
 
 void MotorManager::Tick(uint32_t &time)
 {
+	MotorDeviceInterface::error_code_t error_code;
+	MotorDeviceInterface *device = nullptr;
 	for(uint8_t idx = 0; idx < _max_dev; ++idx)
 	{
-		if(_error[idx].is_error == true)
-		{
-			_error[idx].is_error = false;
-			
-			_callback_error(idx, _error[idx].code);
-		}
+		device = _device[idx];
 		
-		_device[idx]->Tick(time);
+		device->Tick(time);
+		
+		if(device->GetNewError(error_code) == true)
+		{
+			_callback_error(idx, error_code);
+		}
 	}
 	
 	return;
@@ -33,12 +35,8 @@ void MotorManager::RawRx(uint8_t idx, const uint8_t *raw, const uint8_t length)
 {
 	if(idx >= _max_dev) return;
 	if(_device[idx] == nullptr) return;
-	
-	_error[idx].code = (error_code_t)_device[idx]->RawRx(raw, length);
-	if(_error[idx].code != 0)
-	{
-		_error[idx].is_error = true;
-	}
+
+	_device[idx]->RawRx(raw, length);
 	
 	return;
 }

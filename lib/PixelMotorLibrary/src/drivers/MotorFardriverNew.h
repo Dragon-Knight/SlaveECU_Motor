@@ -16,7 +16,7 @@ class MotorFardriverNew : public MotorDeviceInterface
 	public:
 		
 		MotorFardriverNew(uint32_t speed_coefficient) : MotorDeviceInterface(), _speed_coefficient(speed_coefficient), _callback_ready(nullptr), 
-			_last_request_time(0), _auth(false), _need_auth(false), _busy(false), _ready(false)
+			_last_request_time(0), _auth(false), _need_auth(false), _busy(false), _ready(false), common_data(nullptr)
 		{
 			memset(_data, 0x00, sizeof(_data));
 			
@@ -58,7 +58,12 @@ class MotorFardriverNew : public MotorDeviceInterface
 					case 0x80:
 					{
 						FdNew::packet_80_t *packet = (FdNew::packet_80_t *) _data;
-
+						
+						if(common_data->errors != packet->error_flags)
+						{
+							_error.code = (packet->error_flags > 0) ? ERROR_CTRL : ERROR_NONE;
+						}
+						
 						common_data->errors = packet->error_flags;
 						common_data->rpm = packet->rpm >> 2;
 						common_data->speed = ((_speed_coefficient * packet->rpm) / 400000UL);
@@ -126,17 +131,17 @@ class MotorFardriverNew : public MotorDeviceInterface
 		}
 		
 		// Приём пакета, в прерывании. Минимум самый важный действий.
-		virtual int8_t RawRx(const uint8_t *raw, const uint8_t length) override
+		virtual void RawRx(const uint8_t *raw, const uint8_t length) override
 		{
+			_error.code = ERROR_NONE;
 			if(memcmp(FdNew::PacketInitRx, raw, sizeof(FdNew::PacketInitRx)) == 0)
 			{
-				_need_auth = true;
-				return MotorManager::ERROR_NONE;
+				_need_auth = true; return;
 			}
-			if(_busy == true) return MotorManager::ERROR_BUSY;
-			if(length != FdNew::PacketSize) return MotorManager::ERROR_LENGTH;
-			if(memcmp(FdNew::PacketHeader, raw, sizeof(FdNew::PacketHeader)) != 0) return MotorManager::ERROR_HEADER;
-			if(_CheckCRCSum(raw) == false) return MotorManager::ERROR_CRC;
+			if(_busy == true){ _error.code = ERROR_BUSY; return; }
+			if(length != FdNew::PacketSize){ _error.code = ERROR_LENGTH; return; }
+			if(memcmp(FdNew::PacketHeader, raw, sizeof(FdNew::PacketHeader)) != 0){ _error.code = ERROR_HEADER; return; }
+			if(_CheckCRCSum(raw) == false){ _error.code = ERROR_CRC; return; }
 			
 			memcpy(_data, raw, sizeof(_data));
 			
@@ -144,7 +149,7 @@ class MotorFardriverNew : public MotorDeviceInterface
 			_busy = true;
 			_auth = true;
 			
-			return MotorManager::ERROR_NONE;
+			return;
 		}
 		
 		static inline MMD::gear_t FixGear(uint8_t raw)
