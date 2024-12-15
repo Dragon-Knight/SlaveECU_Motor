@@ -90,24 +90,52 @@ namespace MotorCtrl
 		//SetGear(0, GEAR_REVERSE);
 
 
+		CANLib::obj_throttle_value_1.RegisterFunctionSetRealtime
+		(
+			// Колбек realtime данных
+			[](can_frame_t &can_frame, can_error_t &error) -> can_result_t
+			{
+				uint16_t throttle = (can_frame.data[1] | (can_frame.data[2] << 8));
 
-		CANLib::obj_throttle_value_1.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
-		{
-			uint16_t throttle = (can_frame.data[0] | (can_frame.data[1] << 8));
+				DEBUG_LOG_TOPIC("ThrlVal", "motor: 1, idx: %d, val: %d\n", can_frame.data[0], throttle);
+				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, throttle);
 
-			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, throttle);
+				return CAN_RESULT_IGNORE;
+			}, 
+			// Колбек нарушения логики приёма
+			[](uint32_t time_has_passed_ms) -> void
+			{
+				DEBUG_LOG_TOPIC("ThrlVal", "motor: 1, ERROR\n");
+				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0);
+			}, 
+			// Настройки
+			100, 0, true, 3
+		);
+		CANLib::obj_throttle_value_1.ResetRealtimeErrorState();
 
-			return CAN_RESULT_IGNORE;
-		});
-		CANLib::obj_throttle_value_2.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
-		{
-			uint16_t throttle = (can_frame.data[0] | (can_frame.data[1] << 8));
-			
-			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, throttle);
+		CANLib::obj_throttle_value_2.RegisterFunctionSetRealtime
+		(
+			// Колбек realtime данных
+			[](can_frame_t &can_frame, can_error_t &error) -> can_result_t
+			{
+				uint16_t throttle = (can_frame.data[1] | (can_frame.data[2] << 8));
 
-			return CAN_RESULT_IGNORE;
-		});
+				DEBUG_LOG_TOPIC("ThrlVal", "motor: 2, idx: %d, val: %d\n", can_frame.data[0], throttle);
+				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, throttle);
 
+				return CAN_RESULT_IGNORE;
+			}, 
+			// Колбек нарушения логики приёма
+			[](uint32_t time_has_passed_ms) -> void
+			{
+				DEBUG_LOG_TOPIC("ThrlVal", "motor: 2, ERROR\n");
+				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);
+			}, 
+			// Настройки
+			100, 0, true, 3
+		);
+		CANLib::obj_throttle_value_2.ResetRealtimeErrorState();
+		
 		CANLib::obj_transmission_value_1.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
 		{
 			SetGear(0, (gear_t)can_frame.data[0]);
