@@ -95,8 +95,10 @@ namespace Motors
 			if(manager.common_data_ready[0] == true)
 			{
 				common_data = &manager.common_data[0];
+				
 				if(common_data->errors > 0) // Если была ошибка, то уже не сбросится. И вообще нужен event
-					CANLib::obj_controller_errors_1.SetValue(0, common_data->errors, CAN_TIMER_TYPE_CRITICAL, CAN_EVENT_TYPE_NORMAL);
+					CANLib::obj_controller_errors_1.SetValue(0, common_data->errors, CAN_TIMER_TYPE_NONE, CAN_EVENT_TYPE_NORMAL);
+				
 				CANLib::obj_rpm_1.SetValue(0, common_data->rpm, CAN_TIMER_TYPE_NORMAL);
 				CANLib::obj_speed_1.SetValue(0, common_data->speed, CAN_TIMER_TYPE_NORMAL);
 				CANLib::obj_voltage_1.SetValue(0, common_data->voltage, CAN_TIMER_TYPE_NORMAL);
@@ -112,8 +114,10 @@ namespace Motors
 			if(manager.common_data_ready[1] == true)
 			{
 				common_data = &manager.common_data[1];
+				
 				if(common_data->errors > 0) // Если была ошибка, то уже не сбросится. И вообще нужен event
-					CANLib::obj_controller_errors_2.SetValue(0, common_data->errors, CAN_TIMER_TYPE_CRITICAL, CAN_EVENT_TYPE_NORMAL);
+					CANLib::obj_controller_errors_2.SetValue(0, common_data->errors, CAN_TIMER_TYPE_NONE, CAN_EVENT_TYPE_NORMAL);
+				
 				CANLib::obj_rpm_2.SetValue(0, common_data->rpm, CAN_TIMER_TYPE_NORMAL);
 				CANLib::obj_speed_2.SetValue(0, common_data->speed, CAN_TIMER_TYPE_NORMAL);
 				CANLib::obj_voltage_2.SetValue(0, common_data->voltage, CAN_TIMER_TYPE_NORMAL);

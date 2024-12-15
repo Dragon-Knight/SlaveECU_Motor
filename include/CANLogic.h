@@ -7,7 +7,7 @@ extern void HAL_CAN_Send(uint16_t id, uint8_t *data_raw, uint8_t length_raw);
 
 namespace CANLib
 {
-	static constexpr uint8_t CFG_CANObjectsCount = 31;
+	static constexpr uint8_t CFG_CANObjectsCount = 32;
 	static constexpr uint8_t CFG_CANFrameBufferSize = 16;
 	static constexpr uint16_t CFG_CANFirstId = 0x0100;
 	
@@ -28,8 +28,8 @@ namespace CANLib
 	CANObject<uint8_t,  1> obj_brakerecuperation_flag_2(CFG_CANFirstId + 9);
 	CANObject<uint8_t,  1> obj_ignitionlock_flag_1(CFG_CANFirstId + 10);
 	CANObject<uint8_t,  1> obj_ignitionlock_flag_2(CFG_CANFirstId + 11);
-	CANObject<uint16_t, 1> obj_controller_errors_1(CFG_CANFirstId + 12, 250);
-	CANObject<uint16_t, 1> obj_controller_errors_2(CFG_CANFirstId + 13, 250);
+	CANObject<uint16_t, 1> obj_controller_errors_1(CFG_CANFirstId + 12);
+	CANObject<uint16_t, 1> obj_controller_errors_2(CFG_CANFirstId + 13);
 	CANObject<uint16_t, 1> obj_rpm_1(CFG_CANFirstId + 14, 250);
 	CANObject<uint16_t, 1> obj_rpm_2(CFG_CANFirstId + 15, 250);
 	CANObject<uint16_t, 1> obj_speed_1(CFG_CANFirstId + 16, 250);
@@ -47,6 +47,7 @@ namespace CANLib
 	CANObject<int16_t,  1> obj_temperature_controller_1(CFG_CANFirstId + 28, 1000);
 	CANObject<int16_t,  1> obj_temperature_controller_2(CFG_CANFirstId + 29, 1000);
 	CANObject<uint32_t, 1> obj_odometer(CFG_CANFirstId + 30, 5000);
+	CANObject<int8_t,   2> obj_temperature_ext(CFG_CANFirstId + 31);
 
 /*
 	//*********************************************************************
@@ -174,6 +175,7 @@ namespace CANLib
 		can_manager.RegisterObject(obj_temperature_controller_1);
 		can_manager.RegisterObject(obj_temperature_controller_2);
 		can_manager.RegisterObject(obj_odometer);
+		can_manager.RegisterObject(obj_temperature_ext);
 
 		// Передача версий и типов в объект block_info
 		obj_block_info.SetValue(0, (About::board_type << 3 | About::board_ver), CAN_TIMER_TYPE_NORMAL);
