@@ -107,6 +107,9 @@ namespace MotorCtrl
 			{
 				DEBUG_LOG_TOPIC("ThrlVal", "motor: 1, ERROR\n");
 				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, 0);
+				
+				// Защита отключена.
+				CANLib::obj_throttle_value_1.ResetRealtimeErrorState();
 			}, 
 			// Настройки
 			100, 0, true, 3
@@ -130,6 +133,9 @@ namespace MotorCtrl
 			{
 				DEBUG_LOG_TOPIC("ThrlVal", "motor: 2, ERROR\n");
 				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, 0);
+
+				// Защита отключена.
+				CANLib::obj_throttle_value_2.ResetRealtimeErrorState();
 			}, 
 			// Настройки
 			100, 0, true, 3

@@ -206,6 +206,7 @@ int main()
 
     About::Setup();
     Leds::Setup();
+	Analog::Setup();
 	SPI::Setup();
 	Motors::Setup();
 	MotorCtrl::Setup();
@@ -216,6 +217,7 @@ int main()
     {
         About::Loop(current_time);
         Leds::Loop(current_time);
+		Analog::Loop(current_time);
 		SPI::Loop(current_time);
 		Motors::Loop(current_time);
 		MotorCtrl::Loop(current_time);
