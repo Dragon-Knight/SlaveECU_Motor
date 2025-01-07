@@ -21,9 +21,15 @@ namespace Motors
 
 #warning Check packet req connection from controller. Check data
 	
+
+	// Hardcoded speed calc.
+	float WheelDiameter = 620;							// Диаметр колеса, мм.
+	float WheelLenght = M_PI * WheelDiameter;			// Длина колеса, мм.
+	uint32_t SpeedCoef = (WheelLenght * 60.0F) + 0.5F;	// Коэффициент скорости, просто добавить RPM и поделить на 100000.
+	#warning Use Config system
 	
-	MotorFardriverNew motor1(123456);
-	MotorFardriverOld motor2(123456);
+	MotorFardriverNew motor1(SpeedCoef);
+	MotorFardriverOld motor2(SpeedCoef);
 	MotorManager manager(MOTOR_UART_TX, MOTOR_ERROR);
 	
 	struct data_t
