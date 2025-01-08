@@ -7,10 +7,12 @@ extern void HAL_CAN_Send(uint16_t id, uint8_t *data_raw, uint8_t length_raw);
 
 namespace CANLib
 {
+	static_assert(ENV_CAN_FIRST_ID == 0x0100 || ENV_CAN_FIRST_ID == 0x0130, "'ENV_CAN_FIRST_ID' must be 0x0100 or 0x0130 only!");
+	
 	static constexpr uint8_t CFG_CANObjectsCount = 32;
 	static constexpr uint8_t CFG_CANFrameBufferSize = 16;
-	static constexpr uint16_t CFG_CANFirstId = 0x0100;
-	
+	static constexpr uint16_t CFG_CANFirstId = ENV_CAN_FIRST_ID;
+
 	EasyPinD can_rs(GPIOA, {GPIO_PIN_15, GPIO_MODE_OUTPUT_OD, GPIO_NOPULL, GPIO_SPEED_FREQ_LOW});
 	
 	CANManager<CFG_CANObjectsCount, CFG_CANFrameBufferSize> can_manager(&HAL_CAN_Send);
