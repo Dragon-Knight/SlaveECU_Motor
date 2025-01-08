@@ -1,7 +1,7 @@
 #pragma once
 #include <inttypes.h>
 #include <EasyPinA.h>
-#include "MovingAverage.h"
+//#include "MovingAverage.h"
 
 extern ADC_HandleTypeDef hadc1;
 extern TIM_HandleTypeDef htim3;
@@ -26,7 +26,7 @@ namespace MotorCtrl
 
 	
 	EasyPinA throttle(&hadc1, GPIOA, GPIO_PIN_1, ADC_CHANNEL_1, ADC_SAMPLETIME_55CYCLES_5);
-	MovingAverage<uint16_t, uint32_t, 12> throttle_val;
+	//MovingAverage<uint16_t, uint32_t, 12> throttle_val;
 
 
 	
