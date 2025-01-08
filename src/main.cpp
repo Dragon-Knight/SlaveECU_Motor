@@ -8,6 +8,7 @@
 #include <SPI.h>
 #include <About.h>
 #include <Leds.h>
+#include <Config.h>
 #include <CANLogic.h>
 #include <MotorLogic.h>
 #include <MotorCtrl.h>
