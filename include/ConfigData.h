@@ -12,13 +12,5 @@ namespace Config
 			uint16_t min = 150;
 			uint16_t max = 950;
 		} pwm;
-		struct
-		{
-			bool enable = false;
-		} rack1;
-		struct
-		{
-			bool enable = false;
-		} rack2;
 	};
 };
