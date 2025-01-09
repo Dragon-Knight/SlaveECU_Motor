@@ -102,8 +102,10 @@ namespace MotorCtrl
 				uint16_t throttle = (can_frame.data[1] | (can_frame.data[2] << 8));
 
 				//DEBUG_LOG_TOPIC("ThrlVal", "motor: 1, idx: %d, val: %d\n", can_frame.data[0], throttle);
-
-				uint16_t val = map<uint16_t>(throttle, 0, 1023, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
+				
+				// На Main было: MapClump(value, (uint16_t)650, (uint16_t)3000, (uint16_t)0, (uint16_t)1023);
+				// Тут было: uint16_t val = map<uint16_t>(throttle, 0, 1023, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
+				uint16_t val = map_clump<uint16_t>(throttle, 0, 4095, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
 				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, val);
 
 				return CAN_RESULT_IGNORE;
@@ -130,7 +132,9 @@ namespace MotorCtrl
 				uint16_t throttle = (can_frame.data[1] | (can_frame.data[2] << 8));
 
 				//DEBUG_LOG_TOPIC("ThrlVal", "motor: 2, idx: %d, val: %d\n", can_frame.data[0], throttle);
-				uint16_t val = map<uint16_t>(throttle, 0, 1023, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
+				// На Main было: MapClump(value, (uint16_t)650, (uint16_t)3000, (uint16_t)0, (uint16_t)1023);
+				// Тут было: uint16_t val = map<uint16_t>(throttle, 0, 1023, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
+				uint16_t val = map_clump<uint16_t>(throttle, 0, 4095, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
 				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, val);
 
 				return CAN_RESULT_IGNORE;
