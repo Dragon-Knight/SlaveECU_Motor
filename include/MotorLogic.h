@@ -29,7 +29,7 @@ namespace Motors
 	#warning Use Config system
 	
 	MotorFardriverNew motor1(SpeedCoef);
-	MotorFardriverOld motor2(SpeedCoef);
+	MotorFardriverNew motor2(SpeedCoef);
 	MotorManager manager(MOTOR_UART_TX, MOTOR_ERROR);
 	
 	struct data_t
@@ -43,6 +43,8 @@ namespace Motors
 	
 	inline void UART_RX(uint8_t idx, const uint16_t length)
 	{
+		//DEBUG_LOG_TOPIC("MOTOR-RX", "idx: %d, length : %d\n", idx, length);
+
 		manager.RawRx(idx, uart_data[idx].hot, length);
 		
 		return;

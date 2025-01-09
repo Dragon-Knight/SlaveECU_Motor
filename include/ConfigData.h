@@ -9,8 +9,8 @@ namespace Config
 
 		struct
 		{
-			uint16_t min = 150;
-			uint16_t max = 950;
+			uint16_t min = 184;
+			uint16_t max = 839;
 		} pwm;
 	};
 };

@@ -1,6 +1,7 @@
 #pragma once
 #include <inttypes.h>
 #include <EasyPinA.h>
+#include <CUtils.h>
 //#include "MovingAverage.h"
 
 extern ADC_HandleTypeDef hadc1;
@@ -33,7 +34,17 @@ namespace MotorCtrl
 	// Управление передачей
 	void SetGear(uint8_t idx, gear_t gear)
 	{
-		SPI::hc595.WriteByMask(idx, gear, GEAR_MASK);
+		uint8_t byte = GEAR_NEUTRAL;
+		switch(gear)
+		{
+			case 1:
+				byte = GEAR_FORWARD_HI;
+			case 2:
+				byte = GEAR_REVERSE;
+			case 3:
+				byte = GEAR_FORWARD_LOW;
+		}
+		SPI::hc595.WriteByMask(idx, byte, GEAR_MASK);
 		
 		return;
 	}
@@ -97,8 +108,10 @@ namespace MotorCtrl
 			{
 				uint16_t throttle = (can_frame.data[1] | (can_frame.data[2] << 8));
 
-				DEBUG_LOG_TOPIC("ThrlVal", "motor: 1, idx: %d, val: %d\n", can_frame.data[0], throttle);
-				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, throttle);
+				//DEBUG_LOG_TOPIC("ThrlVal", "motor: 1, idx: %d, val: %d\n", can_frame.data[0], throttle);
+
+				uint16_t val = map<uint16_t>(throttle, 0, 1023, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
+				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, val);
 
 				return CAN_RESULT_IGNORE;
 			}, 
@@ -123,8 +136,9 @@ namespace MotorCtrl
 			{
 				uint16_t throttle = (can_frame.data[1] | (can_frame.data[2] << 8));
 
-				DEBUG_LOG_TOPIC("ThrlVal", "motor: 2, idx: %d, val: %d\n", can_frame.data[0], throttle);
-				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, throttle);
+				//DEBUG_LOG_TOPIC("ThrlVal", "motor: 2, idx: %d, val: %d\n", can_frame.data[0], throttle);
+				uint16_t val = map<uint16_t>(throttle, 0, 1023, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
+				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, val);
 
 				return CAN_RESULT_IGNORE;
 			}, 
@@ -144,13 +158,43 @@ namespace MotorCtrl
 		
 		CANLib::obj_transmission_value_1.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
 		{
-			SetGear(0, (gear_t)can_frame.data[0]);
+			//SetGear(0, (gear_t)can_frame.data[0]);
+
+			uint8_t byte = GEAR_NEUTRAL;
+			switch(can_frame.data[0])
+			{
+				case 1:
+					byte = GEAR_FORWARD_HI;
+					break;
+				case 2:
+					byte = GEAR_REVERSE;
+					break;
+				case 3:
+					byte = GEAR_FORWARD_LOW;
+					break;
+			}
+			SPI::hc595.WriteByMask(0, byte, GEAR_MASK);
 			
 			return CAN_RESULT_IGNORE;
 		});
 		CANLib::obj_transmission_value_2.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
 		{
-			SetGear(1, (gear_t)can_frame.data[0]);
+			//SetGear(1, (gear_t)can_frame.data[0]);
+
+			uint8_t byte = GEAR_NEUTRAL;
+			switch(can_frame.data[0])
+			{
+				case 1:
+					byte = GEAR_FORWARD_HI;
+					break;
+				case 2:
+					byte = GEAR_REVERSE;
+					break;
+				case 3:
+					byte = GEAR_FORWARD_LOW;
+					break;
+			}
+			SPI::hc595.WriteByMask(1, byte, GEAR_MASK);
 			
 			return CAN_RESULT_IGNORE;
 		});
