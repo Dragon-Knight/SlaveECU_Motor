@@ -34,17 +34,7 @@ namespace MotorCtrl
 	// Управление передачей
 	void SetGear(uint8_t idx, gear_t gear)
 	{
-		uint8_t byte = GEAR_NEUTRAL;
-		switch(gear)
-		{
-			case 1:
-				byte = GEAR_FORWARD_HI;
-			case 2:
-				byte = GEAR_REVERSE;
-			case 3:
-				byte = GEAR_FORWARD_LOW;
-		}
-		SPI::hc595.WriteByMask(idx, byte, GEAR_MASK);
+		SPI::hc595.WriteByMask(idx, gear, GEAR_MASK);
 		
 		return;
 	}
@@ -76,7 +66,10 @@ namespace MotorCtrl
 
 
 
-
+	bool IsOneBitSet(uint8_t value)
+	{
+		return (value & (value - 1)) == 0 && value != 0;
+	}
 
 
 
@@ -158,43 +151,21 @@ namespace MotorCtrl
 		
 		CANLib::obj_transmission_value_1.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
 		{
-			//SetGear(0, (gear_t)can_frame.data[0]);
+			// По CAN должна приходить флаг по маске с одним битом.
+			// Любая другая ситуация является ошичной и включается нетраль
+			uint8_t gear_raw = (can_frame.data[0] & GEAR_MASK);
+			gear_t gear = IsOneBitSet(gear_raw) ? (gear_t)gear_raw : GEAR_NEUTRAL;
+			SetGear(0, gear);
 
-			uint8_t byte = GEAR_NEUTRAL;
-			switch(can_frame.data[0])
-			{
-				case 1:
-					byte = GEAR_FORWARD_HI;
-					break;
-				case 2:
-					byte = GEAR_REVERSE;
-					break;
-				case 3:
-					byte = GEAR_FORWARD_LOW;
-					break;
-			}
-			SPI::hc595.WriteByMask(0, byte, GEAR_MASK);
-			
 			return CAN_RESULT_IGNORE;
 		});
 		CANLib::obj_transmission_value_2.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
 		{
-			//SetGear(1, (gear_t)can_frame.data[0]);
-
-			uint8_t byte = GEAR_NEUTRAL;
-			switch(can_frame.data[0])
-			{
-				case 1:
-					byte = GEAR_FORWARD_HI;
-					break;
-				case 2:
-					byte = GEAR_REVERSE;
-					break;
-				case 3:
-					byte = GEAR_FORWARD_LOW;
-					break;
-			}
-			SPI::hc595.WriteByMask(1, byte, GEAR_MASK);
+			// По CAN должна приходить флаг по маске с одним битом.
+			// Любая другая ситуация является ошичной и включается нетраль
+			uint8_t gear_raw = (can_frame.data[0] & GEAR_MASK);
+			gear_t gear = IsOneBitSet(gear_raw) ? (gear_t)gear_raw : GEAR_NEUTRAL;
+			SetGear(1, gear);
 			
 			return CAN_RESULT_IGNORE;
 		});
