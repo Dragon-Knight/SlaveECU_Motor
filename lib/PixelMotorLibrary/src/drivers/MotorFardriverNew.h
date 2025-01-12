@@ -15,8 +15,9 @@ class MotorFardriverNew : public MotorDeviceInterface
 	
 	public:
 		
-		MotorFardriverNew(uint32_t speed_coefficient) : MotorDeviceInterface(), _speed_coefficient(speed_coefficient), _callback_ready(nullptr), 
-			_last_request_time(0), _auth(false), _need_auth(false), _busy(false), _ready(false), common_data(nullptr)
+		MotorFardriverNew() : MotorDeviceInterface(), _callback_ready(nullptr), 
+			_last_request_time(0), _last_response_time(0), _auth(false), _need_auth(false), 
+			_busy(false), _ready(false)
 		{
 			memset(_data, 0x00, sizeof(_data));
 			
@@ -32,7 +33,7 @@ class MotorFardriverNew : public MotorDeviceInterface
 		
 		virtual void Init() override
 		{
-			common_data = &_manager->common_data[_idx];
+			return;
 		}
 		
 		virtual void Tick(uint32_t &time) override
@@ -44,6 +45,7 @@ class MotorFardriverNew : public MotorDeviceInterface
 				_need_auth = false;
 			}
 			
+			// Если данные от контроллера приняты
 			if(_ready == true)
 			{
 				_ready = false;
@@ -52,6 +54,7 @@ class MotorFardriverNew : public MotorDeviceInterface
 
 				// Напихиваем полезные данные в общий объект
 				FdNew::packet_raw_t *raw = (FdNew::packet_raw_t *) _data;
+				MMD::common_data_t *common_data = &_manager->common_data[_idx];
 				
 				switch(raw->_A1)
 				{
@@ -111,6 +114,8 @@ class MotorFardriverNew : public MotorDeviceInterface
 						break;
 					}
 				}
+
+				_last_response_time = time;
 				
 				if(_callback_ready != nullptr)
 				{
@@ -118,6 +123,17 @@ class MotorFardriverNew : public MotorDeviceInterface
 				}
 				
 				_busy = false;
+			}
+
+			// Если данные от контроллера не приняты
+			else
+			{
+				// Если от контроллера давно не было данных
+				if(_error.code != ERROR_LOST && time - _last_response_time > 1000)
+				{
+					_manager->ResetCommonData(_idx);
+					_error.code = ERROR_LOST;
+				}
 			}
 			
 			if(time - _last_request_time > FdNew::PacketRequestInerval /*&& _auth == true*/)
@@ -209,16 +225,15 @@ class MotorFardriverNew : public MotorDeviceInterface
 		{
 			return;
 		}
-		
-		uint32_t _speed_coefficient;		// Коэффициент для расчёта скорости из RPM
+
 		callback_ready_t _callback_ready;	// Колбек принятого пакета, если указан
 		uint32_t _last_request_time;		// Время последнего цикла обновления данных
+		uint32_t _last_response_time;		// Время последнего принятого пакета данных
 		bool _auth;							// Флаг пройденной авторизации
 		bool _need_auth;					// Флаг необходимости авторизации
 		bool _busy;							// Флаг того, что разбор данных не окончен и новые копировать нельзя
 		bool _ready;						// Флаг того, что массив данные приняты и готовы к анализу
 		
 		uint8_t _data[FdNew::PacketSize];	// Холодный массив данных (Работа в программе)
-		MMD::common_data_t *common_data;	// Указатель на массив объект общий данных
 
 };

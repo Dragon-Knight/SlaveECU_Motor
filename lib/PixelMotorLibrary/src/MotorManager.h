@@ -26,6 +26,7 @@ class MotorManager
 		void Tick(uint32_t &time);
 		void RawRx(uint8_t idx, const uint8_t *raw, const uint8_t length);
 		void RawTx(uint8_t idx, const uint8_t *raw, const uint8_t length);
+		void ResetCommonData(uint8_t idx);
 		
 		MotorManagerData::common_data_t common_data[_max_dev];
 		bool common_data_ready[_max_dev];

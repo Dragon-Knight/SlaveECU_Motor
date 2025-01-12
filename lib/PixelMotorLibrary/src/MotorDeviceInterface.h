@@ -1,5 +1,6 @@
 #pragma once
 #include <inttypes.h>
+#include <math.h>
 
 class MotorManager;
 
@@ -28,6 +29,14 @@ class MotorDeviceInterface
 		virtual void Init() = 0;
 		virtual void Tick(uint32_t &time) = 0;
 		virtual void RawRx(const uint8_t *raw, const uint8_t length) = 0;
+		
+		void SetWheelDiameter(uint16_t value)
+		{
+			float wheel_lenght = M_PI * (float)value;
+			_speed_coefficient = (wheel_lenght * 60.0F) + 0.5F;
+			
+			return;
+		}
 		
 		bool IsInitiated()
 		{
@@ -73,9 +82,11 @@ class MotorDeviceInterface
 			return;
 		}
 		
-		bool _initiated;			// Флаг того, что объект был добавлен в менеджер
-		MotorManager *_manager;		// Указатель на менеджер
-		uint8_t _idx;				// Индекс порт
+		bool _initiated;				// Флаг того, что объект был добавлен в менеджер
+		MotorManager *_manager;			// Указатель на менеджер
+		uint8_t _idx;					// Индекс порт
+		uint32_t _speed_coefficient;	// Коэффициент для расчёта скорости из RPM
+		
 		struct error_t
 		{
 			error_code_t code = ERROR_NONE;

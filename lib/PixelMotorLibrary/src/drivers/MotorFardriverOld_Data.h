@@ -6,7 +6,7 @@ namespace FardriverOld
 	// Пакет которым флудит контроллер. Запрос на подключение
 	static constexpr uint8_t PacketInitRx[] = {0x41, 0x54, 0x2B ,0x50 ,0x41 ,0x53, 0x53, 0x3D ,0x32, 0x39, 0x36, 0x38, 0x38, 0x37, 0x38, 0x31};
 	
-	// Пакет, которым нужно отетить, чтобы контроллер установил связь
+	// Пакет, которым нужно ответить, чтобы контроллер установил связь
 	static constexpr uint8_t PacketInitTx[] = {0x2B, 0x50, 0x41, 0x53, 0x53, 0x3D, 0x4F, 0x4E, 0x4E, 0x44, 0x4F, 0x4E, 0x4B, 0x45};
 	
 	// Размер пакета принимаемых данных
@@ -15,10 +15,10 @@ namespace FardriverOld
 	// Заголовок пакета
 	static constexpr uint8_t PacketHeader[] = {0xAA};
 	
-	// Пакет запроса данных с БМС
+	// Пакет запроса данных с контроллера
 	static constexpr uint8_t PacketRequest[] = {0xAA, 0x13, 0xEC, 0x07, 0x09, 0x6F, 0x28, 0xD7};
 	
-	// Интервал запроса данных из БМС
+	// Интервал запроса данных из контроллера
 	static constexpr uint16_t PacketRequestInerval = 550;
 	
 	

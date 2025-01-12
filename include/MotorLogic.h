@@ -18,18 +18,11 @@ namespace Motors
 {
 	void MOTOR_UART_TX(uint8_t idx, const uint8_t *raw, const uint16_t length);
 	void MOTOR_ERROR(uint8_t idx, MotorDeviceInterface::error_code_t code);
-
+	
 #warning Check packet req connection from controller. Check data
 	
-
-	// Hardcoded speed calc.
-	float WheelDiameter = 620;							// Диаметр колеса, мм.
-	float WheelLenght = M_PI * WheelDiameter;			// Длина колеса, мм.
-	uint32_t SpeedCoef = (WheelLenght * 60.0F) + 0.5F;	// Коэффициент скорости, просто добавить RPM и поделить на 100000.
-	#warning Use Config system
-	
-	MotorFardriverNew motor1(SpeedCoef);
-	MotorFardriverNew motor2(SpeedCoef);
+	MotorFardriverNew motor1;
+	MotorFardriverNew motor2;
 	MotorManager manager(MOTOR_UART_TX, MOTOR_ERROR);
 	
 	struct data_t
@@ -96,7 +89,8 @@ namespace Motors
 			// Заполяем данные, но при этом частота обновлений будет примерно 1.5с
 		});
 */	
-
+		motor1.SetWheelDiameter(Config::obj.body.wheel_diameter);
+		motor2.SetWheelDiameter(Config::obj.body.wheel_diameter);
 		manager.SetModel(MOTOR_1, motor1);
 		manager.SetModel(MOTOR_2, motor2);
 		

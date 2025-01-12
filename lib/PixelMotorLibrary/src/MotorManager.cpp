@@ -47,3 +47,13 @@ void MotorManager::RawTx(uint8_t idx, const uint8_t *raw, const uint8_t length)
 	
 	return;
 }
+
+void MotorManager::ResetCommonData(uint8_t idx)
+{
+	if(idx >= _max_dev) return;
+	
+	memset(&common_data[idx], 0x00, sizeof(MotorManagerData::common_data_t));
+	common_data_ready[idx] = false;
+
+	return;
+}

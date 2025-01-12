@@ -21,10 +21,6 @@ namespace MotorCtrl
 	static uint8_t BREAK_RECOVERY_BIT = 4;
 	static uint8_t LOCK_BIT = 7;
 
-	static constexpr uint16_t PWM_MIN = 150;
-	static constexpr uint16_t PWM_MAX = 950;
-
-
 	
 	EasyPinA throttle(&hadc1, GPIOA, GPIO_PIN_1, ADC_CHANNEL_1, ADC_SAMPLETIME_55CYCLES_5);
 	//MovingAverage<uint16_t, uint32_t, 12> throttle_val;
@@ -55,29 +51,11 @@ namespace MotorCtrl
 		return;
 	}
 
-
-
-
-
-	bool CheckThrottleValue(uint16_t value)
-	{
-		return (value > 200 && value < 3850);
-	}
-
-
-
-	bool IsOneBitSet(uint8_t value)
-	{
-		return (value & (value - 1)) == 0 && value != 0;
-	}
-
-
-
-
+	
 	void HardwareSetup()
 	{
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, PWM_MIN);
-		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, PWM_MIN);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, Config::obj.body.throttle.pwm_min);
+		__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, Config::obj.body.throttle.pwm_min);
 		
 		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 		HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
@@ -101,11 +79,13 @@ namespace MotorCtrl
 			{
 				uint16_t throttle = (can_frame.data[1] | (can_frame.data[2] << 8));
 
+				auto *cfg = &Config::obj.body.throttle;
+
 				//DEBUG_LOG_TOPIC("ThrlVal", "motor: 1, idx: %d, val: %d\n", can_frame.data[0], throttle);
 				
 				// На Main было: MapClump(value, (uint16_t)650, (uint16_t)3000, (uint16_t)0, (uint16_t)1023);
 				// Тут было: uint16_t val = map<uint16_t>(throttle, 0, 1023, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
-				uint16_t val = map_clump<uint16_t>(throttle, 0, 4095, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
+				uint16_t val = map_clump<uint16_t>(throttle, cfg->pedal_min, cfg->pedal_max, cfg->pwm_min, cfg->pwm_max);
 				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, val);
 
 				return CAN_RESULT_IGNORE;
@@ -131,10 +111,12 @@ namespace MotorCtrl
 			{
 				uint16_t throttle = (can_frame.data[1] | (can_frame.data[2] << 8));
 
+				auto *cfg = &Config::obj.body.throttle;
+				
 				//DEBUG_LOG_TOPIC("ThrlVal", "motor: 2, idx: %d, val: %d\n", can_frame.data[0], throttle);
 				// На Main было: MapClump(value, (uint16_t)650, (uint16_t)3000, (uint16_t)0, (uint16_t)1023);
 				// Тут было: uint16_t val = map<uint16_t>(throttle, 0, 1023, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
-				uint16_t val = map_clump<uint16_t>(throttle, 0, 4095, Config::obj.body.pwm.min, Config::obj.body.pwm.max);
+				uint16_t val = map_clump<uint16_t>(throttle, cfg->pedal_min, cfg->pedal_max, cfg->pwm_min, cfg->pwm_max);
 				__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, val);
 
 				return CAN_RESULT_IGNORE;
