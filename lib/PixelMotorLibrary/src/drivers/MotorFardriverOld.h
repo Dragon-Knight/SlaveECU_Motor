@@ -180,29 +180,38 @@ class MotorFardriverOld : public MotorDeviceInterface
 		
 		static inline MMD::gear_t FixGear(uint8_t raw)
 		{
-			// 01 - Передняя
-			// 0С - Нейтраль
-			// 0E - Задняя
+			// 0С - 00 - Нейтраль
+			// 01 - 01 - Передняя
+			// 0E - 02 - Задняя
 			
-			return (MMD::gear_t)(raw & 0x03);
+			MMD::gear_t gear;
+			switch(raw)
+			{
+				case 0x0C: { gear = MMD::GEAR_NEUTRAL; break; }
+				case 0x01: { gear = MMD::GEAR_FORWARD; break; }
+				case 0x0E: { gear = MMD::GEAR_REVERSE; break; }
+				default:   { gear = MMD::GEAR_UNKNOWN; break; }
+			}
+			
+			return gear;
 		}
 		
 		static inline MMD::roll_t FixRoll(uint8_t raw)
 		{
-			MMD::roll_t result = MMD::ROLL_UNKNOWN;
-			
 			// 00 - Стоп
 			// 01 - Назад
 			// 03 - Вперёд
 			
+			MMD::roll_t roll;
 			switch(raw)
 			{
-				case 0x00: { result = MMD::ROLL_STOP; break; }
-				case 0x01: { result = MMD::ROLL_REVERSE; break; }
-				case 0x03: { result = MMD::ROLL_FORWARD; break; }
+				case 0x00: { roll = MMD::ROLL_STOP; break; }
+				case 0x01: { roll = MMD::ROLL_REVERSE; break; }
+				case 0x03: { roll = MMD::ROLL_FORWARD; break; }
+				default:   { roll = MMD::ROLL_UNKNOWN; break; }
 			}
 			
-			return result;
+			return roll;
 		}
 		
 	private:

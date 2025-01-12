@@ -10,13 +10,13 @@ extern TIM_HandleTypeDef htim3;
 namespace MotorCtrl
 {
 	
-	enum gear_t : uint8_t
+	enum shift_mask_gear_t : uint8_t
 	{
-		GEAR_NEUTRAL = 0b00000000,
-		GEAR_FORWARD_LOW = 0b00000001,
-		GEAR_FORWARD_HI = 0b00000010,
-		GEAR_REVERSE = 0b00000100,
-		GEAR_MASK = 0b00000111
+		GEAR_NEUTRAL =		0b00000000,
+		GEAR_FORWARD_LOW =	0b00000001,
+		GEAR_FORWARD_HI =	0b00000010,
+		GEAR_REVERSE =		0b00000100,
+		GEAR_MASK =			0b00000111
 	};
 	static uint8_t BREAK_RECOVERY_BIT = 4;
 	static uint8_t LOCK_BIT = 7;
@@ -28,7 +28,7 @@ namespace MotorCtrl
 
 	
 	// Управление передачей
-	void SetGear(uint8_t idx, gear_t gear)
+	void SetGear(uint8_t idx, shift_mask_gear_t gear)
 	{
 		SPI::hc595.WriteByMask(idx, gear, GEAR_MASK);
 		
@@ -49,6 +49,23 @@ namespace MotorCtrl
 		SPI::hc595.SetState(idx, LOCK_BIT, state);
 		
 		return;
+	}
+	
+	void SetGear(uint8_t idx, uint8_t mask)
+	{
+		shift_mask_gear_t gear;
+		
+		switch(mask)
+		{
+			case MotorManagerData::GEAR_NEUTRAL: { gear = GEAR_NEUTRAL; break; }
+			case MotorManagerData::GEAR_FORWARD: { gear = GEAR_FORWARD_HI; break; }
+			case MotorManagerData::GEAR_REVERSE: { gear = GEAR_REVERSE; break; }
+			case MotorManagerData::GEAR_LOW: { gear = GEAR_FORWARD_LOW; break; }
+			//case MotorManagerData::GEAR_BOOST:   { gear = GEAR_BOOST; break; }
+			default: { gear = GEAR_NEUTRAL; break; }
+		}
+		
+		return SetGear(idx, gear);
 	}
 
 	
@@ -139,9 +156,11 @@ namespace MotorCtrl
 		{
 			// По CAN должна приходить флаг по маске с одним битом.
 			// Любая другая ситуация является ошичной и включается нетраль
-			uint8_t gear_raw = (can_frame.data[0] & GEAR_MASK);
-			gear_t gear = IsOneBitSet(gear_raw) ? (gear_t)gear_raw : GEAR_NEUTRAL;
-			SetGear(0, gear);
+			//uint8_t gear_raw = (can_frame.data[0] & GEAR_MASK);
+			//gear_t gear = IsOneBitSet(gear_raw) ? (gear_t)gear_raw : GEAR_NEUTRAL;
+			//SetGear(0, gear);
+			
+			SetGear(0, can_frame.data[0]);
 
 			return CAN_RESULT_IGNORE;
 		});
@@ -149,9 +168,11 @@ namespace MotorCtrl
 		{
 			// По CAN должна приходить флаг по маске с одним битом.
 			// Любая другая ситуация является ошичной и включается нетраль
-			uint8_t gear_raw = (can_frame.data[0] & GEAR_MASK);
-			gear_t gear = IsOneBitSet(gear_raw) ? (gear_t)gear_raw : GEAR_NEUTRAL;
-			SetGear(1, gear);
+			//uint8_t gear_raw = (can_frame.data[0] & GEAR_MASK);
+			//gear_t gear = IsOneBitSet(gear_raw) ? (gear_t)gear_raw : GEAR_NEUTRAL;
+			//SetGear(1, gear);
+
+			SetGear(1, can_frame.data[0]);
 			
 			return CAN_RESULT_IGNORE;
 		});
