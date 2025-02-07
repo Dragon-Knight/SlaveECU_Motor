@@ -2,7 +2,6 @@
 #include <inttypes.h>
 #include <EasyPinA.h>
 #include <CUtils.h>
-//#include "MovingAverage.h"
 
 extern ADC_HandleTypeDef hadc1;
 extern TIM_HandleTypeDef htim3;
@@ -20,11 +19,6 @@ namespace MotorCtrl
 	};
 	static uint8_t BREAK_RECOVERY_BIT = 4;
 	static uint8_t LOCK_BIT = 7;
-
-	
-	EasyPinA throttle(&hadc1, GPIOA, GPIO_PIN_1, ADC_CHANNEL_1, ADC_SAMPLETIME_55CYCLES_5);
-	//MovingAverage<uint16_t, uint32_t, 12> throttle_val;
-
 
 	
 	// Управление передачей
@@ -83,11 +77,6 @@ namespace MotorCtrl
 	inline void Setup()
 	{
 		HardwareSetup();
-
-		throttle.Init();
-
-		//SetGear(0, GEAR_REVERSE);
-
 
 		CANLib::obj_throttle_value_1.RegisterFunctionSetRealtime
 		(
@@ -231,7 +220,7 @@ namespace MotorCtrl
 		{
 			tick_20 = current_time;
 
-			
+/*			
 			uint16_t throttle_adc = throttle.Get();
 			throttle_adc >>= 2;
 			
@@ -278,31 +267,9 @@ namespace MotorCtrl
 				if( counter_neg >= sample_counter )
 					adc_val--;
 			}
-
-
-
-
-/*
-			//throttle_val.Push(throttle_adc);
-			DEBUG_LOG_TOPIC("Motor", "throttle: %04d\n", throttle_adc);
-			Logger.Printf(">Motor raw:%d\n", throttle_adc);
-			Logger.Printf(">Motor calc:%d\n", adc_val);
-			if(CheckThrottleValue(throttle_adc) == true)
-			{
-
-			}
-*/
-/*			
-			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, val1);
-			__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_2, (1023 - val1));
-			if(++val1 == 1023) val1 = 0;
 */			
-			
-
-
-
 		}
-		
+	
 		
 		
 		current_time = HAL_GetTick();
