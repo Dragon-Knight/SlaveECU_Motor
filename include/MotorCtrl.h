@@ -161,8 +161,9 @@ namespace MotorCtrl
 			//SetGear(0, gear);
 			
 			SetGear(0, can_frame.data[0]);
-
-			return CAN_RESULT_IGNORE;
+			
+			can_frame.function_id = CAN_FUNC_EVENT_OK;
+			return CAN_RESULT_CAN_FRAME;
 		});
 		CANLib::obj_transmission_value_2.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
 		{
@@ -174,7 +175,8 @@ namespace MotorCtrl
 
 			SetGear(1, can_frame.data[0]);
 			
-			return CAN_RESULT_IGNORE;
+			can_frame.function_id = CAN_FUNC_EVENT_OK;
+			return CAN_RESULT_CAN_FRAME;
 		});
 
 		CANLib::obj_brakerecuperation_flag_1.RegisterFunctionSet([](can_frame_t &can_frame, can_error_t &error) -> can_result_t
